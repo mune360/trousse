@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <title>Trousse Santé</title>
+
+<!-- REF:http://samcroft.co.uk/2013/using-localstorage-to-store-json/ -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="js/jquery.jsonp-2.1.4.min.js"></script>
+    
+    <script>
+	$(document).ready(function(){
+		$('#your-tweets').append('<li>Loading Sam Croft\'s tweets');		
+		$.jsonp({
+			url: 'http://twitter.com/status/user_timeline/samcroft.json?count=20',
+			callbackParameter: 'callback',
+			timeout: 25000,
+			success: function(data, status) {
+				//$('#your-tweets').append('<li>The feed loads fine');
+				$('#your-tweets').empty();
+				$.each(data, function(i,item){ 
+					var tweet = item.text;
+					$('#your-tweets').append('<li>'+tweet);
+				});
+			},
+			error: function(){
+				$('#your-tweets').append('<li>There was an error loading the feed');
+			}
+		});
+	});
+	
+	function refresh() {
+		$('#listePersonnes').append('<li class="list-group-item">Loading Sam Croft\'s tweets');		
+		$.jsonp({
+			url: 'http://twitter.com/status/user_timeline/samcroft.json?count=20',
+			callbackParameter: 'callback',
+			timeout: 25000,
+			success: function(data, status) {
+				//$('#your-tweets').append('<li>The feed loads fine');
+				$('#listePersonnes').empty();
+				$.each(data, function(i,item){ 
+					var tweet = item.text;
+					$('#listePersonnes').append('<li class="list-group-item">'+tweet);
+				});
+			},
+			error: function(){
+				$('#listePersonnes').append('<li class="list-group-item">There was an error loading the feed');
+			}
+		});
+
+	}
+
+	
+	function test() {
+			$('#listePersonnes').append('<li class="list-group-item">Loading ...');	
+			$.jsonp({
+			url: 'http://localhost:3000/liste.txt',
+			callbackParameter: 'callback',
+			success: function(data, status) {
+				$.each(data, function(key, value){
+					console.log(key + ' = ' + value);
+            		var name = value.text
+            		$('#listePersonnes').append('<li class="list-group-item">'+name);
+            		             
+        		});
+    		},
+    		error: function() {
+        		$('#listePersonnes').append('<li class="list-group-item">Error...');
+    		}
+    		
+		});
+	}	
+	
+	</script>
+	       
+    </head>
+    <body>
+    	<div id="home" class="container">
+    		<h3>Voici la liste de vos personnes à charge</h3>
+    		<ul id="listePersonnes" class="list-group"></ul>
+    	</div>
+    	<div id="menu_bas">
+    		<button onclick="refresh()">Rafraichir</button>
+    		<button onclick="test()">+</button>
+    	</div>
+        
+         <ul id="your-tweets"></ul>
+
+      
+    </body>
+</html>
