@@ -5,92 +5,111 @@
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-tap-highlight" content="no" />
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+  		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+ 		
         <title>Trousse Santé</title>
 
-<!-- REF:http://samcroft.co.uk/2013/using-localstorage-to-store-json/ -->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="js/jquery.jsonp-2.1.4.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     
     <script>
-	$(document).ready(function(){
-		$('#your-tweets').append('<li>Loading Sam Croft\'s tweets');		
-		$.jsonp({
-			url: 'http://twitter.com/status/user_timeline/samcroft.json?count=20',
-			callbackParameter: 'callback',
-			timeout: 25000,
-			success: function(data, status) {
-				//$('#your-tweets').append('<li>The feed loads fine');
-				$('#your-tweets').empty();
+    $(function() {
+        $("#newuser").submit( function(event)
+           {
+           	event.preventDefault();
+           	var $form = $( this );
+            var fname = $form.find("input[id='fname']").val();
+            var lname = $form.find("input[id='lname']").val();
+            var bdate = $form.find("input[id='bdate']").val();
+            
+            //window.localStorage.setItem('list',dataTest);
+
+            console.log('Recu:'+fname+' '+lname+' '+bdate);
+            
+           }
+        );
+    });
+
+    
+	function sync() {
+		$("#new").hide();
+		$("#listePersonnes").empty();
+		
+		$(document).ready(function(){
+		$.getJSON( "js/liste.json", {
+		format: "json"
+		})
+			.done(function(data) {
+				console.log(data);
+				var dataTest = JSON.stringify(data);
+				window.localStorage.setItem('list',dataTest);
+					console.log(dataTest);
+				
 				$.each(data, function(i,item){ 
-					var tweet = item.text;
-					$('#your-tweets').append('<li>'+tweet);
+					console.log(item);
+					var fname = item.firstName;
+					var lname = item.lastName;
+					$('#listePersonnes').append('<li class="list-group-item">'+fname+' '+lname+'</li>');
 				});
-			},
-			error: function(){
-				$('#your-tweets').append('<li>There was an error loading the feed');
-			}
-		});
-	});
+       			
+			});
+	})
+	
+	};
 	
 	function refresh() {
-		$('#listePersonnes').append('<li class="list-group-item">Loading Sam Croft\'s tweets');		
-		$.jsonp({
-			url: 'http://twitter.com/status/user_timeline/samcroft.json?count=20',
-			callbackParameter: 'callback',
-			timeout: 25000,
-			success: function(data, status) {
-				//$('#your-tweets').append('<li>The feed loads fine');
-				$('#listePersonnes').empty();
-				$.each(data, function(i,item){ 
-					var tweet = item.text;
-					$('#listePersonnes').append('<li class="list-group-item">'+tweet);
-				});
-			},
-			error: function(){
-				$('#listePersonnes').append('<li class="list-group-item">There was an error loading the feed');
-			}
+		$("#new").hide();
+		var localData = JSON.parse(window.localStorage.getItem('list'));
+		$.each(localData,function(k, value){
+			console.log(value);
+			var fname = value.firstName;
+			var lname = value.lastName;
+			$('#listePersonnes').append('<li class="list-group-item">'+fname+' '+lname+'</li>');
 		});
 
-	}
-
+    };
 	
-	function test() {
-			$('#listePersonnes').append('<li class="list-group-item">Loading ...');	
-			$.jsonp({
-			url: 'http://localhost:3000/liste.txt',
-			callbackParameter: 'callback',
-			success: function(data, status) {
-				$.each(data, function(key, value){
-					console.log(key + ' = ' + value);
-            		var name = value.text
-            		$('#listePersonnes').append('<li class="list-group-item">'+name);
-            		             
-        		});
-    		},
-    		error: function() {
-        		$('#listePersonnes').append('<li class="list-group-item">Error...');
-    		}
-    		
-		});
-	}	
+	function addUser() {
+		$("#new").toggle();
+		
+	};
 	
 	</script>
+
 	       
     </head>
-    <body>
+    <body onload="refresh()">
     	<div id="home" class="container">
     		<h3>Voici la liste de vos personnes à charge</h3>
     		<ul id="listePersonnes" class="list-group"></ul>
     	</div>
     	<div id="menu_bas">
-    		<button onclick="refresh()">Rafraichir</button>
-    		<button onclick="test()">+</button>
+    		<button onclick="sync()">Synchroniser</button>
+    		<button onclick="addUser()">+</button>
+    		<button onclick="refresh()">Force refresh</button>
     	</div>
         
-         <ul id="your-tweets"></ul>
+		<div id="new">
+  <form id="newuser" class="form-inline" role="form">
+    <div class="form-group">
+      <label for="fname">Prenom:</label>
+      <input type="text" class="form-control" id="fname" placeholder="Prenom">
+    </div>
+    <div class="form-group">
+      <label for="lname">Nom de famille:</label>
+      <input type="text" class="form-control" id="lname" placeholder="Nom de famille">
+    </div>
+    <div class="form-group">
+      <label for="bdate">Date de naissance:</label>
+      <input type="text" class="form-control" id="bdate" placeholder="ex.:2015/01/01">
+    </div>
+    <button id="button" type="submit" class="btn btn-default">Submit</button>
+  </form>		
+		
+		</div>
+
 
       
     </body>
